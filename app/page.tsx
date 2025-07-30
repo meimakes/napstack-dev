@@ -5,6 +5,8 @@ import { PomodoroTimer } from "@/components/pomodoro-timer"
 import { AmbientSounds } from "@/components/ambient-sounds"
 import { LiveActivity } from "@/components/live-activity"
 import { CelebrationSection } from "@/components/celebration-section"
+import { RoadmapModal } from "@/components/roadmap-modal"
+import { Button } from "@/components/ui/button"
 
 export default function Dashboard() {
   const [isTimerRunning, setIsTimerRunning] = useState(false)
@@ -131,8 +133,22 @@ export default function Dashboard() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-6 text-sm text-[#87A96B]/70 dark:text-gray-400 transition-colors duration-300">
-        Made for parents who code during naptime • by @meimakes
+      <footer className="text-center py-6 text-sm text-[#87A96B]/70 dark:text-gray-400 transition-colors duration-300 space-y-2">
+        <div>Made for parents who code during naptime • by @meimakes</div>
+        <div className="flex items-center justify-center gap-3">
+          <span className="px-2 py-1 bg-[#87A96B]/10 dark:bg-slate-700 rounded text-xs font-mono">
+            v0.1.0-prerelease
+          </span>
+          <RoadmapModal>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs h-auto p-1 text-[#87A96B]/70 dark:text-gray-400 hover:text-[#87A96B] dark:hover:text-gray-300"
+            >
+              View Roadmap
+            </Button>
+          </RoadmapModal>
+        </div>
       </footer>
     </div>
   )

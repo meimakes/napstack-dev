@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
@@ -9,139 +9,117 @@ interface AmbientSoundsProps {
   onActivityMessage: (text: string, type?: string) => void
 }
 
+interface Sound {
+  id: string
+  name: string
+  icon: string
+  url: string
+  volumeMultiplier: number
+}
+
+const sounds: Sound[] = [
+  {
+    id: "coffee",
+    name: "Coffee Shop",
+    icon: "☕",
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/coffee-WoDCfv3RsmxYuoM2V8BCWwHuEzaN5G.mp3",
+    volumeMultiplier: 0.8,
+  },
+  {
+    id: "rain",
+    name: "Rain",
+    icon: "🌧️",
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/rain-QZ8k0OEezntGNILvnuXEGOo5LmBjFk.mp3",
+    volumeMultiplier: 1.0,
+  },
+  {
+    id: "fireplace",
+    name: "Fireplace",
+    icon: "🔥",
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/fireplace-JjFbg2VlKrU7DArsESsKOpUY9IVwBp.mp3",
+    volumeMultiplier: 1.2,
+  },
+  {
+    id: "lofi",
+    name: "Lofi",
+    icon: "🎵",
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/lofi-cH8mWFhRUFi2hICDRy1PKuuLlj3OYS.mp3",
+    volumeMultiplier: 0.9,
+  },
+]
+
 export function AmbientSounds({ onActivityMessage }: AmbientSoundsProps) {
-  const [activeSounds, setActiveSounds] = useState<string[]>([])
-  const [volume, setVolume] = useState([70])
-  const [userInteracted, setUserInteracted] = useState(false)
+  const [activeSound, setActiveSound] = useState<string | null>(null)
+  const [volume, setVolume] = useState(70)
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({})
-
-  const sounds = [
-    { id: "coffee", name: "Coffee Shop", icon: "☕", color: "#8B4513", file: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/coffee-WoDCfv3RsmxYuoM2V8BCWwHuEzaN5G.mp3" },
-    { id: "rain", name: "Rain", icon: "🌧️", color: "#4A90E2", file: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/rain-QZ8k0OEezntGNILvnuXEGOo5LmBjFk.mp3" },
-    { id: "fireplace", name: "Fireplace", icon: "🔥", color: "#FF6B6B", file: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/fireplace-JjFbg2VlKrU7DArsESsKOpUY9IVwBp.mp3" },
-    { id: "lofi", name: "Lofi", icon: "🎵", color: "#87A96B", file: null }, // Will add later
-  ]
-
-  // Track user interaction to prevent auto-play issues
-  useEffect(() => {
-    const handleUserInteraction = () => {
-      setUserInteracted(true)
-      document.removeEventListener("click", handleUserInteraction)
-      document.removeEventListener("keydown", handleUserInteraction)
-    }
-
-    document.addEventListener("click", handleUserInteraction)
-    document.addEventListener("keydown", handleUserInteraction)
-
-    return () => {
-      document.removeEventListener("click", handleUserInteraction)
-      document.removeEventListener("keydown", handleUserInteraction)
-    }
-  }, [])
 
   // Initialize audio elements
   useEffect(() => {
     sounds.forEach((sound) => {
-      if (sound.file && !audioRefs.current[sound.id]) {
-        const audio = new Audio(sound.file)
-        audio.loop = true
-        audio.volume = volume[0] / 100
-        audioRefs.current[sound.id] = audio
-      }
+      const audio = new Audio(sound.url)
+      audio.loop = true
+      audio.preload = "metadata"
+      audioRefs.current[sound.id] = audio
     })
 
     return () => {
-      // Cleanup audio elements
+      // Cleanup
       Object.values(audioRefs.current).forEach((audio) => {
         audio.pause()
-        audio.currentTime = 0
+        audio.src = ""
       })
     }
   }, [])
 
-  // Update volume for all audio elements
+  // Update volume for all audio elements when volume changes
   useEffect(() => {
-    Object.values(audioRefs.current).forEach((audio) => {
-      audio.volume = volume[0] / 100
+    Object.entries(audioRefs.current).forEach(([soundId, audio]) => {
+      const sound = sounds.find((s) => s.id === soundId)
+      if (sound) {
+        audio.volume = (volume / 100) * sound.volumeMultiplier
+      }
     })
   }, [volume])
 
-  // Load preferences from localStorage - but don't auto-play until user interaction
-  useEffect(() => {
-    const savedSounds = localStorage.getItem("napstack-sounds")
-    const savedVolume = localStorage.getItem("napstack-volume")
+  const toggleSound = async (soundId: string) => {
+    const audio = audioRefs.current[soundId]
+    const sound = sounds.find((s) => s.id === soundId)
 
-    if (savedSounds) {
-      const loadedSounds = JSON.parse(savedSounds)
-      setActiveSounds(loadedSounds)
+    if (!audio || !sound) return
 
-      // Only start playing saved sounds after user interaction
-      if (userInteracted) {
-        loadedSounds.forEach((soundId: string) => {
-          const audio = audioRefs.current[soundId]
-          if (audio) {
-            audio.play().catch(console.error)
-          }
-        })
-      }
-    }
-    if (savedVolume) {
-      setVolume([Number.parseInt(savedVolume)])
-    }
-  }, [userInteracted])
-
-  // Save preferences to localStorage
-  useEffect(() => {
-    localStorage.setItem("napstack-sounds", JSON.stringify(activeSounds))
-  }, [activeSounds])
-
-  useEffect(() => {
-    localStorage.setItem("napstack-volume", volume[0].toString())
-  }, [volume])
-
-  const toggleSound = (soundId: string) => {
-    setActiveSounds((prev) => {
-      const newSounds = prev.includes(soundId) ? prev.filter((id) => id !== soundId) : [...prev, soundId]
-
-      // Handle audio playback
-      const audio = audioRefs.current[soundId]
-      if (audio) {
-        if (prev.includes(soundId)) {
-          // Stop the sound
-          audio.pause()
-          audio.currentTime = 0
-        } else {
-          // Start the sound
-          audio.play().catch(console.error)
+    if (activeSound === soundId) {
+      // Stop current sound
+      audio.pause()
+      audio.currentTime = 0
+      setActiveSound(null)
+      onActivityMessage(`Stopped ${sound.name} 🔇`, "sound")
+    } else {
+      // Stop any currently playing sound
+      if (activeSound) {
+        const currentAudio = audioRefs.current[activeSound]
+        if (currentAudio) {
+          currentAudio.pause()
+          currentAudio.currentTime = 0
         }
       }
 
-      // Trigger activity message when sound is activated
-      if (!prev.includes(soundId)) {
-        const sound = sounds.find((s) => s.id === soundId)
-        if (sound) {
-          if (newSounds.length === 1) {
-            onActivityMessage(`Someone's vibing to ${sound.name} ${sound.icon}`, "sound")
-          } else {
-            // Fixed: Remove the extra + by properly joining the names
-            const activeNames = newSounds
-              .map((id) => sounds.find((s) => s.id === id)?.name)
-              .filter(Boolean)
-              .join(" + ")
-            onActivityMessage(`Coding to ${activeNames} 🎵`, "sound")
-          }
-        }
+      // Start new sound
+      try {
+        // Apply normalized volume before playing
+        audio.volume = (volume / 100) * sound.volumeMultiplier
+        await audio.play()
+        setActiveSound(soundId)
+        onActivityMessage(`Someone's vibing to ${sound.name} ${sound.icon}`, "sound")
+      } catch (error) {
+        console.log("Could not play audio:", error)
+        onActivityMessage(`${sound.name} audio not available`, "sound")
       }
-
-      return newSounds
-    })
+    }
   }
 
   return (
-    <Card className="p-6 bg-white dark:bg-slate-800 shadow-lg border-0 rounded-lg retro-card transition-colors duration-300">
-      {/* Remove the gradient overlay div completely */}
-
-      <div className="relative z-10 space-y-6">
+    <Card className="p-6 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm shadow-lg border-0 rounded-lg retro-card transition-colors duration-300">
+      <div className="space-y-6">
         {/* Cassette Header */}
         <div className="text-center">
           <div className="inline-flex items-center gap-3 bg-[#87A96B]/10 dark:bg-green-600/10 px-4 py-2 rounded-full">
@@ -157,19 +135,15 @@ export function AmbientSounds({ onActivityMessage }: AmbientSoundsProps) {
         {/* Sound Buttons */}
         <div className="grid grid-cols-2 gap-3">
           {sounds.map((sound) => {
-            const isActive = activeSounds.includes(sound.id)
-            const isDisabled = !sound.file && sound.id === "lofi"
+            const isActive = activeSound === sound.id
             return (
               <Button
                 key={sound.id}
-                onClick={() => !isDisabled && toggleSound(sound.id)}
-                disabled={isDisabled}
+                onClick={() => toggleSound(sound.id)}
                 className={`h-16 flex flex-col items-center justify-center gap-1 rounded-lg transition-all duration-200 hover:scale-105 retro-button overflow-hidden relative ${
                   isActive
                     ? "bg-[#87A96B] dark:bg-green-600 text-white shadow-lg"
-                    : isDisabled
-                      ? "bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                      : "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600"
+                    : "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600"
                 }`}
               >
                 <div className="flex flex-col items-center justify-center flex-1 min-h-0">
@@ -200,20 +174,23 @@ export function AmbientSounds({ onActivityMessage }: AmbientSoundsProps) {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Volume</span>
-            <span className="text-sm font-mono text-[#87A96B] dark:text-green-400">{volume[0]}%</span>
+            <span className="text-sm font-mono text-[#87A96B] dark:text-green-400">{volume}%</span>
           </div>
-          <Slider value={volume} onValueChange={setVolume} max={100} step={1} className="w-full" />
+          <Slider
+            value={[volume]}
+            onValueChange={(value) => setVolume(value[0])}
+            max={100}
+            step={1}
+            className="w-full"
+          />
         </div>
 
-        {/* Currently Playing - Fixed the extra + issue */}
-        {activeSounds.length > 0 && (
+        {/* Currently Playing */}
+        {activeSound && (
           <div className="text-center p-3 bg-[#87A96B]/5 dark:bg-green-600/10 rounded-lg">
             <div className="text-xs text-[#87A96B] dark:text-green-400 font-medium mb-1">NOW PLAYING</div>
             <div className="text-sm text-gray-600 dark:text-gray-300">
-              {activeSounds
-                .map((id) => sounds.find((s) => s.id === id)?.name)
-                .filter(Boolean)
-                .join(" + ")}
+              {sounds.find((s) => s.id === activeSound)?.name}
             </div>
           </div>
         )}
