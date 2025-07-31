@@ -144,6 +144,13 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Inspired by the incredible parent-developer community
 - Special thanks to all parents who manage to ship code between diaper changes
 
+### 🎵 Audio Attributions
+
+- **Lofi**: [Moody Lofi Loop 70bpm](https://freesound.org/s/659309/) by Seth_Makes_Sounds - License: Creative Commons 0
+- **Fireplace**: [Fire.wav](https://freesound.org/s/347706/) by TheBoatman - License: Attribution 4.0
+- **Rain**: [Soft Rain Loop](https://freesound.org/s/595717/) by _lynks - License: Creative Commons 0
+- **Coffee Shop**: [Cafe 1](https://freesound.org/s/165280/) by Rylius - License: Attribution 4.0
+
 ## 💬 Community
 
 Join our community of parent developers:
