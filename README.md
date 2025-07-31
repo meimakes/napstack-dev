@@ -2,6 +2,10 @@
 
 A productivity dashboard designed for parents who code during naptime and other precious quiet moments. Built with love for the parent-developer community.
 
+**Live site: [NapStack.dev](https://napstack.dev)**
+
+Under active development and welcoming contributions!
+
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/mei-made-it/v0-napstack-dev)
 [![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/EHbkPNpUprM)
 
