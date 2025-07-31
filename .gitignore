@@ -25,3 +25,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ai
+.claude
+
+# VS Code
+.vscode/
+*.code-workspace
+.history/
+*.vsix
