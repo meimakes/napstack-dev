@@ -89,30 +89,30 @@ Future features planned:
 
 1. Clone the repository:
 
-\`\`\`bash
+```shell
 git clone https://github.com/meimakes/napstack-dev.git
 cd napstack-dev
-\`\`\`
+```
 
 2. Install dependencies:
 
-\`\`\`bash
+```shell
 npm install
 # or
 yarn install
 # or
 pnpm install
-\`\`\`
+```
 
 3. Run the development server:
 
-\`\`\`bash
+```shell
 npm run dev
 # or
 yarn dev
 # or
 pnpm dev
-\`\`\`
+```
 
 1. Open [http://localhost:3000](http://localhost:3000) in your browser
 
