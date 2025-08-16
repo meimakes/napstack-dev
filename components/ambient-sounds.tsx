@@ -74,12 +74,15 @@ export function AmbientSounds({ onActivityMessage }: AmbientSoundsProps) {
   // Update volume for all audio elements when volume changes
   useEffect(() => {
     Object.entries(audioRefs.current).forEach(([soundId, audio]) => {
+      if (!audio) return
+      
       const sound = sounds.find((s) => s.id === soundId)
-      if (sound) {
-        audio.volume = (volume / 100) * sound.volumeMultiplier
+      if (sound && sound.volumeMultiplier !== undefined && !isNaN(sound.volumeMultiplier)) {
+        const calculatedVolume = Math.max(0, Math.min(1, (volume / 100) * sound.volumeMultiplier))
+        audio.volume = calculatedVolume
       }
     })
-  }, [volume])
+  }, [volume, audioRefs.current])
 
   const toggleSound = async (soundId: string) => {
     const audio = audioRefs.current[soundId]
@@ -106,7 +109,12 @@ export function AmbientSounds({ onActivityMessage }: AmbientSoundsProps) {
       // Start new sound
       try {
         // Apply normalized volume before playing
-        audio.volume = (volume / 100) * sound.volumeMultiplier
+        if (sound.volumeMultiplier !== undefined && !isNaN(sound.volumeMultiplier)) {
+          const calculatedVolume = Math.max(0, Math.min(1, (volume / 100) * sound.volumeMultiplier))
+          audio.volume = calculatedVolume
+        } else {
+          audio.volume = Math.max(0, Math.min(1, volume / 100))
+        }
         await audio.play()
         setActiveSound(soundId)
         onActivityMessage(`Someone's vibing to ${sound.name} ${sound.icon}`, "sound")
@@ -178,7 +186,7 @@ export function AmbientSounds({ onActivityMessage }: AmbientSoundsProps) {
           </div>
           <Slider
             value={[volume]}
-            onValueChange={(value) => setVolume(value[0])}
+            onValueChange={(value: number[]) => setVolume(value[0])}
             max={100}
             step={1}
             className="w-full"
