@@ -174,3 +174,22 @@
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-500 dark:bg-slate-400;
 }
+
+/* Grid layout optimizations */
+.grid-layout {
+  min-height: 600px;
+  max-height: calc(100vh - 16rem);
+}
+
+@media (max-width: 1024px) {
+  .grid-layout {
+    min-height: auto;
+    max-height: none;
+  }
+}
+
+/* Ensure footer is always visible */
+footer {
+  position: relative;
+  z-index: 10;
+}
